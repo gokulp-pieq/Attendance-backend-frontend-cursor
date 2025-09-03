@@ -4,6 +4,7 @@ import com.attendance.dao.AttendanceDAO
 import com.attendance.dao.EmployeeDAO
 import com.attendance.dto.CheckinRequest
 import com.attendance.dto.CheckoutRequest
+import com.attendance.dto.AttendanceResponse
 import com.attendance.model.Attendance
 import com.attendance.service.AttendanceService
 import org.jdbi.v3.core.Jdbi
@@ -12,6 +13,7 @@ import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
 import java.time.LocalDate
+import java.time.Duration
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 
@@ -52,7 +54,18 @@ class AttendanceResource(private val jdbi: Jdbi) {
         }
         
         val attendances = attendanceService.getAttendanceByEmployeeId(uuid)
-        return Response.ok(attendances).build()
+        val response = attendances.map { a ->
+            val totalSeconds = a.checkoutDatetime?.let { checkout ->
+                Duration.between(a.checkinDatetime, checkout).seconds
+            }
+            AttendanceResponse(
+                empId = a.empId.toString(),
+                checkinDatetime = a.checkinDatetime,
+                checkoutDatetime = a.checkoutDatetime,
+                totalWorkingSeconds = totalSeconds
+            )
+        }
+        return Response.ok(response).build()
     }
     
     @GET
@@ -75,13 +88,23 @@ class AttendanceResource(private val jdbi: Jdbi) {
                 .entity(mapOf("error" to "Invalid date format. Use YYYY-MM-DD")).build()
         }
         
-        val attendance = attendanceService.getAttendanceByEmployeeIdAndDate(uuid, date)
-        return if (attendance != null) {
-            Response.ok(attendance).build()
-        } else {
-            Response.status(Response.Status.NOT_FOUND)
+        val attendances = attendanceService.getAttendanceByEmployeeIdAndDate(uuid, date)
+        if (attendances.isEmpty()) {
+            return Response.status(Response.Status.NOT_FOUND)
                 .entity(mapOf("error" to "No attendance found for the specified date")).build()
         }
+        val response = attendances.map { a ->
+            val totalSeconds = a.checkoutDatetime?.let { checkout ->
+                Duration.between(a.checkinDatetime, checkout).seconds
+            }
+            AttendanceResponse(
+                empId = a.empId.toString(),
+                checkinDatetime = a.checkinDatetime,
+                checkoutDatetime = a.checkoutDatetime,
+                totalWorkingSeconds = totalSeconds
+            )
+        }
+        return Response.ok(response).build()
     }
     
     @GET
