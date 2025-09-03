@@ -1,0 +1,16 @@
+meta {
+  name: Get Employee by UUID
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/employees/uuid/550e8400-e29b-41d4-a716-446655440000
+}
+
+docs {
+  desc: Get employee details by their UUID
+  examples: [
+    "Get employee with UUID: {{baseUrl}}/api/employees/uuid/550e8400-e29b-41d4-a716-446655440000"
+  ]
+}

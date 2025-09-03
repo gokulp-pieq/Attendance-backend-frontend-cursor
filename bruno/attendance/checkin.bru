@@ -1,0 +1,24 @@
+meta {
+  name: Employee Check-in
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/attendance/checkin
+  body: json {
+    {
+      "emp_id": "550e8400-e29b-41d4-a716-446655440000",
+      "checkin_datetime": "2024-01-15T09:00:00"
+    }
+  }
+}
+
+docs {
+  desc: Record employee check-in
+  examples: [
+    "Check-in with custom datetime",
+    "Check-in with current time (default)",
+    "Note: Use snake_case field names (emp_id, checkin_datetime)"
+  ]
+}

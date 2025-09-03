@@ -1,0 +1,26 @@
+meta {
+  name: Update Employee
+  type: http
+  seq: 6
+}
+
+put {
+  url: {{baseUrl}}/api/employees/550e8400-e29b-41d4-a716-446655440000
+  body: json {
+    {
+      "firstName": "John",
+      "lastName": "Smith",
+      "email": "john.smith@example.com",
+      "roleId": 2,
+      "deptId": 2,
+      "reportingTo": null
+    }
+  }
+}
+
+docs {
+  desc: Update an existing employee by UUID
+  examples: [
+    "Update employee with UUID: {{baseUrl}}/api/employees/550e8400-e29b-41d4-a716-446655440000"
+  ]
+}

@@ -1,0 +1,28 @@
+meta {
+  name: Create Employee
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/employees
+  body: json {
+    {
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "john.doe@example.com",
+      "roleId": 1,
+      "deptId": 1,
+      "reportingTo": null
+    }
+  }
+}
+
+docs {
+  desc: Create a new employee
+  examples: [
+    "Create employee with all required fields",
+    "Department ID 1 = Engineering, Role ID 1 = Developer",
+    "Note: Use snake_case field names in requests"
+  ]
+}

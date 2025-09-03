@@ -1,0 +1,16 @@
+meta {
+  name: Get Employee by Email
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/employees/email/john.doe@example.com
+}
+
+docs {
+  desc: Get employee details by their email address
+  examples: [
+    "Get employee with email: {{baseUrl}}/api/employees/email/john.doe@example.com"
+  ]
+}

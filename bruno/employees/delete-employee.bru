@@ -1,0 +1,16 @@
+meta {
+  name: Delete Employee
+  type: http
+  seq: 7
+}
+
+delete {
+  url: {{baseUrl}}/api/employees/550e8400-e29b-41d4-a716-446655440000
+}
+
+docs {
+  desc: Delete an employee by UUID
+  examples: [
+    "Delete employee with UUID: {{baseUrl}}/api/employees/550e8400-e29b-41d4-a716-446655440000"
+  ]
+}

@@ -1,0 +1,16 @@
+meta {
+  name: Get Attendance by Employee
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/attendance/employee/550e8400-e29b-41d4-a716-446655440000
+}
+
+docs {
+  desc: Get all attendance records for a specific employee
+  examples: [
+    "Get attendance for employee UUID: {{baseUrl}}/api/attendance/employee/550e8400-e29b-41d4-a716-446655440000"
+  ]
+}

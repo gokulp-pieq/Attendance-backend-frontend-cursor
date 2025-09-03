@@ -1,0 +1,24 @@
+meta {
+  name: Get All Employees
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/employees
+  query: {
+    dept_id: 1
+    role_id: 1
+    search: "john"
+  }
+}
+
+docs {
+  desc: Get all employees with optional filtering by department, role, or search term
+  examples: [
+    "Get all employees: {{baseUrl}}/api/employees",
+    "Filter by department: {{baseUrl}}/api/employees?dept_id=1",
+    "Filter by role: {{baseUrl}}/api/employees?role_id=1",
+    "Search by name: {{baseUrl}}/api/employees?search=john"
+  ]
+}

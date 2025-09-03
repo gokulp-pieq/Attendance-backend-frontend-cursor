@@ -1,0 +1,16 @@
+meta {
+  name: Get Roles
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/employees/roles
+}
+
+docs {
+  desc: Get all available employee roles
+  examples: [
+    "Get all roles: {{baseUrl}}/api/employees/roles"
+  ]
+}

@@ -1,0 +1,16 @@
+meta {
+  name: Get Today's Attendance
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/api/attendance/today
+}
+
+docs {
+  desc: Get all attendance records for today
+  examples: [
+    "Get today's attendance: {{baseUrl}}/api/attendance/today"
+  ]
+}

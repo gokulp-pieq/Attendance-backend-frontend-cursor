@@ -1,0 +1,16 @@
+meta {
+  name: Get Attendance Summary by Date
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/attendance/summary/date/2024-01-15
+}
+
+docs {
+  desc: Get attendance summary for a specific date
+  examples: [
+    "Get summary for specific date: {{baseUrl}}/api/attendance/summary/date/2024-01-15"
+  ]
+}

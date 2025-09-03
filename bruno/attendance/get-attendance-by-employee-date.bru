@@ -1,0 +1,16 @@
+meta {
+  name: Get Attendance by Employee and Date
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/attendance/employee/550e8400-e29b-41d4-a716-446655440000/date/2024-01-15
+}
+
+docs {
+  desc: Get attendance record for a specific employee on a specific date
+  examples: [
+    "Get attendance for employee on specific date: {{baseUrl}}/api/attendance/employee/550e8400-e29b-41d4-a716-446655440000/date/2024-01-15"
+  ]
+}

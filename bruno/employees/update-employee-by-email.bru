@@ -1,0 +1,26 @@
+meta {
+  name: Update Employee by Email
+  type: http
+  seq: 10
+}
+
+put {
+  url: {{baseUrl}}/api/employees/email/john.doe@example.com
+  body: json {
+    {
+      "firstName": "John",
+      "lastName": "Smith",
+      "email": "john.smith@example.com",
+      "roleId": 2,
+      "deptId": 2,
+      "reportingTo": null
+    }
+  }
+}
+
+docs {
+  desc: Update an existing employee by email address
+  examples: [
+    "Update employee with email: {{baseUrl}}/api/employees/email/john.doe@example.com"
+  ]
+}

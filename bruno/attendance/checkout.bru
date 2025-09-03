@@ -1,0 +1,24 @@
+meta {
+  name: Employee Check-out
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/attendance/checkout
+  body: json {
+    {
+      "emp_id": "550e8400-e29b-41d4-a716-446655440000",
+      "checkout_datetime": "2024-01-15T17:00:00"
+    }
+  }
+}
+
+docs {
+  desc: Record employee check-out
+  examples: [
+    "Check-out with custom datetime",
+    "Check-out with current time (default)",
+    "Note: Use snake_case field names (emp_id, checkout_datetime)"
+  ]
+}

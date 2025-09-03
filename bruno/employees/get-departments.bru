@@ -1,0 +1,16 @@
+meta {
+  name: Get Departments
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/api/employees/departments
+}
+
+docs {
+  desc: Get all available departments
+  examples: [
+    "Get all departments: {{baseUrl}}/api/employees/departments"
+  ]
+}

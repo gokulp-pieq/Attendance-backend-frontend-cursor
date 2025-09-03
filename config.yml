@@ -1,0 +1,39 @@
+server:
+  applicationConnectors:
+    - type: http
+      port: 8085
+  adminConnectors:
+    - type: http
+      port: 8086
+
+database:
+  driverClass: org.postgresql.Driver
+  user: postgres
+  password: postgres
+  url: jdbc:postgresql://localhost:5432/Attendance_Management2
+  validationQuery: "SELECT 1"
+  properties:
+    charSet: UTF-8
+    hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+    useLegacyDatetimeCode: false
+    serverTimezone: UTC
+    timezone: UTC
+    ApplicationName: AttendanceManagement
+    tcpKeepAlive: true
+    socketTimeout: 30
+    connectTimeout: 30
+    # Additional timezone-related properties
+    jdbcCompliantTruncation: false
+    useUnicode: true
+    characterEncoding: UTF-8
+    # Force UTC timezone
+    serverTimezone: UTC
+    timezone: UTC
+    useLegacyDatetimeCode: false
+
+logging:
+  level: INFO
+  loggers:
+    com.attendance: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE

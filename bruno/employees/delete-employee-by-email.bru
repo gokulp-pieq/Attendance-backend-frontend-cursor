@@ -1,0 +1,16 @@
+meta {
+  name: Delete Employee by Email
+  type: http
+  seq: 11
+}
+
+delete {
+  url: {{baseUrl}}/api/employees/email/john.doe@example.com
+}
+
+docs {
+  desc: Delete an employee by email address
+  examples: [
+    "Delete employee with email: {{baseUrl}}/api/employees/email/john.doe@example.com"
+  ]
+}
