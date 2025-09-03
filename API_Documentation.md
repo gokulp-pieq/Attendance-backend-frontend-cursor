@@ -1,638 +1,520 @@
-# Attendance Management API Documentation
+# Employee Attendance Management System - API Documentation
 
 ## Base URL
 ```
 http://localhost:8085
 ```
 
-## API Overview
-This API provides endpoints for managing employees and tracking attendance in an organization.
+## Authentication
 
-**Total Endpoints: 20**
-- **Employee Management: 10 endpoints**
-- **Attendance Management: 10 endpoints**
+### Login
+**POST** `/api/auth/login`
 
----
-
-## Employee Management
-
-### 1. Get All Employees
-**Endpoint:** `GET /api/employees`
-
-**Description:** Retrieve all employees with optional filtering capabilities.
-
-**Query Parameters:**
-- `dept_id` (optional): Filter by department ID
-- `role_id` (optional): Filter by role ID  
-- `search` (optional): Search by employee name
-
-**Example Request:**
-```bash
-GET /api/employees?dept_id=1&role_id=1&search=john
-```
-
-**Response Structure:**
-```json
-[
-  {
-    "id": 1,
-    "empId": "550e8400-e29b-41d4-a716-446655440000",
-    "firstName": "John",
-    "lastName": "Doe",
-    "email": "john.doe@example.com",
-    "roleId": 1,
-    "deptId": 1,
-    "reportingTo": null
-  }
-]
-```
-
----
-
-### 2. Get Employee by UUID
-**Endpoint:** `GET /api/employees/uuid/{empId}`
-
-**Description:** Get employee details by their UUID.
-
-**Path Parameters:**
-- `empId`: Employee's UUID
-
-**Example Request:**
-```bash
-GET /api/employees/uuid/550e8400-e29b-41d4-a716-446655440000
-```
-
-**Response Structure:**
-```json
-{
-  "id": 1,
-  "empId": "550e8400-e29b-41d4-a716-446655440000",
-  "firstName": "John",
-  "lastName": "Doe",
-  "email": "john.doe@example.com",
-  "roleId": 1,
-  "deptId": 1,
-  "reportingTo": null
-}
-```
-
----
-
-### 3. Get Employee by Email
-**Endpoint:** `GET /api/employees/email/{email}`
-
-**Description:** Get employee details by their email address.
-
-**Path Parameters:**
-- `email`: Employee's email address
-
-**Example Request:**
-```bash
-GET /api/employees/email/john.doe@example.com
-```
-
-**Response Structure:** Same as Get Employee by UUID
-
----
-
-### 4. Create Employee
-**Endpoint:** `POST /api/employees`
-
-**Description:** Create a new employee.
+Authenticates a user and returns employee information.
 
 **Request Body:**
 ```json
 {
-  "firstName": "John",
-  "lastName": "Doe",
   "email": "john.doe@example.com",
-  "roleId": 1,
-  "deptId": 1,
-  "reportingTo": null
+  "password": "password123"
 }
 ```
 
-**Required Fields:**
-- `firstName`: Employee's first name
-- `lastName`: Employee's last name
-- `email`: Employee's email address
-- `roleId`: Role ID (1 = Developer, 2 = Manager, 3 = Analyst, 4 = Admin)
-- `deptId`: Department ID (1 = Engineering, 2 = Marketing, 3 = HR, 4 = Finance)
-
-**Optional Fields:**
-- `reportingTo`: UUID of the employee this person reports to
-
-**Response Structure:**
+**Response (200 OK):**
 ```json
 {
   "id": 1,
-  "empId": "550e8400-e29b-41d4-a716-446655440000",
-  "firstName": "John",
-  "lastName": "Doe",
+  "emp_id": "550e8400-e29b-41d4-a716-446655440000",
+  "first_name": "John",
+  "last_name": "Doe",
   "email": "john.doe@example.com",
-  "roleId": 1,
-  "deptId": 1,
-  "reportingTo": null
+  "role_id": 1,
+  "dept_id": 1,
+  "reporting_to": null
 }
 ```
 
-**Status Codes:**
-- `201 Created`: Employee created successfully
-- `400 Bad Request`: Validation error in request body
-
----
-
-### 5. Update Employee by UUID
-**Endpoint:** `PUT /api/employees/uuid/{empId}`
-
-**Description:** Update an existing employee by UUID.
-
-**Path Parameters:**
-- `empId`: Employee's UUID
-
-**Request Body:** Same structure as Create Employee
-
-**Example Request:**
-```bash
-PUT /api/employees/uuid/550e8400-e29b-41d4-a716-446655440000
+**Error Response (401 Unauthorized):**
+```json
+{
+  "code": 401,
+  "message": "Invalid credentials"
+}
 ```
 
-**Response Structure:** Same as Create Employee
+## Employee Management
 
-**Status Codes:**
-- `200 OK`: Employee updated successfully
-- `400 Bad Request`: Invalid UUID format or validation error
-- `404 Not Found`: Employee not found
+### Get All Employees
+**GET** `/api/employees`
 
----
+Returns a list of all employees.
 
-### 6. Update Employee by Email
-**Endpoint:** `PUT /api/employees/email/{email}`
-
-**Description:** Update an existing employee by email address.
-
-**Path Parameters:**
-- `email`: Employee's email address
-
-**Request Body:** Same structure as Create Employee
-
-**Example Request:**
-```bash
-PUT /api/employees/email/john.doe@example.com
-```
-
-**Response Structure:** Same as Create Employee
-
-**Status Codes:**
-- `200 OK`: Employee updated successfully
-- `400 Bad Request`: Validation error in request body
-- `404 Not Found`: Employee not found
-
----
-
-### 7. Delete Employee by UUID
-**Endpoint:** `DELETE /api/employees/uuid/{empId}`
-
-**Description:** Delete an employee by UUID.
-
-**Path Parameters:**
-- `empId`: Employee's UUID
-
-**Example Request:**
-```bash
-DELETE /api/employees/uuid/550e8400-e29b-41d4-a716-446655440000
-```
-
-**Response Structure:**
-- `204 No Content`: Employee deleted successfully
-- `400 Bad Request`: Invalid UUID format
-- `500 Internal Server Error`: Failed to delete employee
-
----
-
-### 8. Delete Employee by Email
-**Endpoint:** `DELETE /api/employees/email/{email}`
-
-**Description:** Delete an employee by email address.
-
-**Path Parameters:**
-- `email`: Employee's email address
-
-**Example Request:**
-```bash
-DELETE /api/employees/email/john.doe@example.com
-```
-
-**Response Structure:**
-- `204 No Content`: Employee deleted successfully
-- `404 Not Found`: Employee not found
-- `500 Internal Server Error`: Failed to delete employee
-
----
-
-### 9. Get Roles
-**Endpoint:** `GET /api/employees/roles`
-
-**Description:** Get all available employee roles.
-
-**Example Request:**
-```bash
-GET /api/employees/roles
-```
-
-**Response Structure:**
+**Response (200 OK):**
 ```json
 [
   {
     "id": 1,
-    "name": "Developer",
-    "description": "Software developer role"
-  },
-  {
-    "id": 2,
-    "name": "Manager",
-    "description": "Team management role"
-  },
-  {
-    "id": 3,
-    "name": "Analyst",
-    "description": "Business analysis role"
-  },
-  {
-    "id": 4,
-    "name": "Admin",
-    "description": "Administrative role"
+    "emp_id": "550e8400-e29b-41d4-a716-446655440000",
+    "first_name": "John",
+    "last_name": "Doe",
+    "email": "john.doe@example.com",
+    "role_id": 1,
+    "dept_id": 1,
+    "reporting_to": null
   }
 ]
 ```
 
----
+### Get Employee by Email
+**GET** `/api/employees/email/{email}`
 
-### 10. Get Departments
-**Endpoint:** `GET /api/employees/departments`
+Returns employee details by email address.
 
-**Description:** Get all available departments.
-
-**Example Request:**
-```bash
-GET /api/employees/departments
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "emp_id": "550e8400-e29b-41d4-a716-446655440000",
+  "first_name": "John",
+  "last_name": "Doe",
+  "email": "john.doe@example.com",
+  "role_id": 1,
+  "dept_id": 1,
+  "reporting_to": null
+}
 ```
 
-**Response Structure:**
+**Error Response (404 Not Found):**
+```json
+{
+  "code": 404,
+  "message": "Employee not found"
+}
+```
+
+### Get Employee by UUID
+**GET** `/api/employees/uuid/{empId}`
+
+Returns employee details by UUID.
+
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "emp_id": "550e8400-e29b-41d4-a716-446655440000",
+  "first_name": "John",
+  "last_name": "Doe",
+  "email": "john.doe@example.com",
+  "role_id": 1,
+  "dept_id": 1,
+  "reporting_to": null
+}
+```
+
+### Create Employee
+**POST** `/api/employees`
+
+Creates a new employee.
+
+**Request Body:**
+```json
+{
+  "first_name": "Jane",
+  "last_name": "Smith",
+  "email": "jane.smith@example.com",
+  "password": "password123",
+  "role_id": 1,
+  "dept_id": 1,
+  "reporting_to": "550e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+**Response (201 Created):**
+```json
+{
+  "id": 2,
+  "emp_id": "550e8400-e29b-41d4-a716-446655440001",
+  "first_name": "Jane",
+  "last_name": "Smith",
+  "email": "jane.smith@example.com",
+  "role_id": 1,
+  "dept_id": 1,
+  "reporting_to": "550e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+**Error Response (409 Conflict):**
+```json
+{
+  "code": 409,
+  "message": "Email already exists"
+}
+```
+
+### Update Employee by Email
+**PUT** `/api/employees/email/{email}`
+
+Updates an existing employee by email.
+
+**Request Body:**
+```json
+{
+  "first_name": "Jane",
+  "last_name": "Smith",
+  "email": "jane.smith@example.com",
+  "role_id": 2,
+  "dept_id": 1,
+  "reporting_to": null
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "id": 2,
+  "emp_id": "550e8400-e29b-41d4-a716-446655440001",
+  "first_name": "Jane",
+  "last_name": "Smith",
+  "email": "jane.smith@example.com",
+  "role_id": 2,
+  "dept_id": 1,
+  "reporting_to": null
+}
+```
+
+### Update Employee by UUID
+**PUT** `/api/employees/uuid/{empId}`
+
+Updates an existing employee by UUID.
+
+**Request Body:** Same as above.
+
+### Delete Employee by Email
+**DELETE** `/api/employees/email/{email}`
+
+Deletes an employee by email.
+
+**Response (200 OK):**
+```json
+{
+  "message": "Employee deleted successfully"
+}
+```
+
+### Delete Employee by UUID
+**DELETE** `/api/employees/uuid/{empId}`
+
+Deletes an employee by UUID.
+
+### Get All Roles
+**GET** `/api/employees/roles`
+
+Returns a list of all available roles.
+
+**Response (200 OK):**
+```json
+[
+  {
+    "id": 1,
+    "name": "Employee",
+    "description": "Regular employee"
+  },
+  {
+    "id": 2,
+    "name": "Supervisor",
+    "description": "Team supervisor"
+  },
+  {
+    "id": 3,
+    "name": "Manager",
+    "description": "Department manager"
+  },
+  {
+    "id": 4,
+    "name": "Director",
+    "description": "Company director"
+  },
+  {
+    "id": 5,
+    "name": "Admin",
+    "description": "System administrator"
+  }
+]
+```
+
+### Get All Departments
+**GET** `/api/employees/departments`
+
+Returns a list of all available departments.
+
+**Response (200 OK):**
 ```json
 [
   {
     "id": 1,
     "name": "Engineering",
-    "description": "Software development department"
+    "description": "Software development team"
   },
   {
     "id": 2,
-    "name": "Marketing",
-    "description": "Marketing and sales department"
+    "name": "Sales",
+    "description": "Sales and marketing team"
   },
   {
     "id": 3,
     "name": "HR",
-    "description": "Human resources department"
+    "description": "Human resources team"
   },
   {
     "id": 4,
     "name": "Finance",
-    "description": "Financial operations department"
+    "description": "Finance and accounting team"
   }
 ]
 ```
 
----
-
 ## Attendance Management
 
-### 11. Employee Check-in
-**Endpoint:** `POST /api/attendance/checkin`
+### Check-in
+**POST** `/api/attendance/checkin`
 
-**Description:** Record employee check-in.
+Records employee check-in time.
 
 **Request Body:**
 ```json
 {
-  "emp_id": "550e8400-e29b-41d4-a716-446655440000",
-  "checkin_datetime": "2024-01-15T09:00:00"
+  "emp_id": "550e8400-e29b-41d4-a716-446655440000"
 }
 ```
 
-**Required Fields:**
-- `emp_id`: Employee's UUID
-- `checkin_datetime`: Check-in timestamp (ISO 8601 format, defaults to current time if not provided)
-
-**Response Structure:**
+**Response (200 OK):**
 ```json
 {
   "id": 1,
-  "employeeId": "550e8400-e29b-41d4-a716-446655440000",
-  "checkinTime": "2024-01-15T09:00:00",
-  "checkoutTime": null,
-  "location": "Office Building A",
-  "notes": "On time arrival",
-  "createdAt": "2024-01-15T09:00:00",
-  "updatedAt": "2024-01-15T09:00:00"
+  "emp_id": "550e8400-e29b-41d4-a716-446655440000",
+  "checkin_datetime": "2025-09-03T08:00:00",
+  "checkout_datetime": null
 }
 ```
 
-**Status Codes:**
-- `201 Created`: Check-in recorded successfully
-- `400 Bad Request`: Validation error or invalid employee ID
+### Check-out
+**POST** `/api/attendance/checkout`
 
----
-
-### 12. Employee Check-out
-**Endpoint:** `POST /api/attendance/checkout`
-
-**Description:** Record employee check-out.
+Records employee check-out time.
 
 **Request Body:**
 ```json
 {
-  "emp_id": "550e8400-e29b-41d4-a716-446655440000",
-  "checkout_datetime": "2024-01-15T17:00:00"
+  "emp_id": "550e8400-e29b-41d4-a716-446655440000"
 }
 ```
 
-**Required Fields:**
-- `emp_id`: Employee's UUID
-- `checkout_datetime`: Check-out timestamp (ISO 8601 format, defaults to current time if not provided)
-
-**Response Structure:** Same as Check-in response, but with `checkoutTime` populated
-
-**Status Codes:**
-- `200 OK`: Check-out recorded successfully
-- `400 Bad Request`: Validation error or invalid employee ID
-
----
-
-### 13. Get Attendance by Employee
-**Endpoint:** `GET /api/attendance/employee/{empId}`
-
-**Description:** Get all attendance records for a specific employee.
-
-**Path Parameters:**
-- `empId`: Employee's UUID
-
-**Example Request:**
-```bash
-GET /api/attendance/employee/550e8400-e29b-41d4-a716-446655440000
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "emp_id": "550e8400-e29b-41d4-a716-446655440000",
+  "checkin_datetime": "2025-09-03T08:00:00",
+  "checkout_datetime": "2025-09-03T17:00:00"
+}
 ```
 
-**Response Structure:**
+### Get Today's Attendance
+**GET** `/api/attendance/today`
+
+Returns today's attendance records for all employees.
+
+**Response (200 OK):**
 ```json
 [
   {
     "id": 1,
-    "employeeId": "550e8400-e29b-41d4-a716-446655440000",
-    "checkinTime": "2024-01-15T09:00:00",
-    "checkoutTime": "2024-01-15T17:00:00",
-    "location": "Office Building A",
-    "notes": "Regular work day",
-    "createdAt": "2024-01-15T09:00:00",
-    "updatedAt": "2024-01-15T17:00:00"
+    "emp_id": "550e8400-e29b-41d4-a716-446655440000",
+    "checkin_datetime": "2025-09-03T08:00:00",
+    "checkout_datetime": "2025-09-03T17:00:00"
   }
 ]
 ```
 
----
+### Get Attendance by Date
+**GET** `/api/attendance/date/{date}`
 
-### 14. Get Attendance by Employee and Date
-**Endpoint:** `GET /api/attendance/employee/{empId}/date/{date}`
+Returns attendance records for a specific date (format: YYYY-MM-DD).
 
-**Description:** Get attendance record for a specific employee on a specific date.
-
-**Path Parameters:**
-- `empId`: Employee's UUID
-- `date`: Date in YYYY-MM-DD format
-
-**Example Request:**
-```bash
-GET /api/attendance/employee/550e8400-e29b-41d4-a716-446655440000/date/2024-01-15
-```
-
-**Response Structure:** Single attendance object or null if no record found
-
-**Status Codes:**
-- `200 OK`: Attendance record found
-- `404 Not Found`: No attendance record for the specified date
-
----
-
-### 15. Get Attendance by Date
-**Endpoint:** `GET /api/attendance/date/{date}`
-
-**Description:** Get all attendance records for a specific date.
-
-**Path Parameters:**
-- `date`: Date in YYYY-MM-DD format
-
-**Example Request:**
-```bash
-GET /api/attendance/date/2024-01-15
-```
-
-**Response Structure:** Array of attendance objects
-
----
-
-### 16. Get Attendance by Date Range
-**Endpoint:** `GET /api/attendance/date-range`
-
-**Description:** Get all attendance records within a date range.
-
-**Query Parameters:**
-- `start_date`: Start date in YYYY-MM-DD format
-- `end_date`: End date in YYYY-MM-DD format
-
-**Example Request:**
-```bash
-GET /api/attendance/date-range?start_date=2024-01-01&end_date=2024-01-31
-```
-
-**Response Structure:** Array of attendance objects
-
----
-
-### 17. Get Attendance Summary by Employee
-**Endpoint:** `GET /api/attendance/summary/employee/{empId}`
-
-**Description:** Get attendance summary for a specific employee within a date range.
-
-**Path Parameters:**
-- `empId`: Employee's UUID
-
-**Query Parameters:**
-- `start_date`: Start date in YYYY-MM-DD format
-- `end_date`: End date in YYYY-MM-DD format
-
-**Example Request:**
-```bash
-GET /api/attendance/summary/employee/550e8400-e29b-41d4-a716-446655440000?start_date=2024-01-01&end_date=2024-01-31
-```
-
-**Response Structure:**
+**Response (200 OK):**
 ```json
-{
-  "employeeId": "550e8400-e29b-41d4-a716-446655440000",
-  "totalDays": 22,
-  "presentDays": 20,
-  "absentDays": 2,
-  "averageCheckinTime": "09:15:00",
-  "averageCheckoutTime": "17:30:00",
-  "totalWorkHours": 176.5
-}
+[
+  {
+    "id": 1,
+    "emp_id": "550e8400-e29b-41d4-a716-446655440000",
+    "checkin_datetime": "2025-09-03T08:00:00",
+    "checkout_datetime": "2025-09-03T17:00:00"
+  }
+]
 ```
 
----
+### Get Employee Attendance
+**GET** `/api/attendance/employee/{empId}`
 
-### 18. Get Attendance Summary by Date
-**Endpoint:** `GET /api/attendance/summary/date/{date}`
+Returns all attendance records for a specific employee.
 
-**Description:** Get attendance summary for a specific date.
-
-**Path Parameters:**
-- `date`: Date in YYYY-MM-DD format
-
-**Example Request:**
-```bash
-GET /api/attendance/summary/date/2024-01-15
-```
-
-**Response Structure:**
+**Response (200 OK):**
 ```json
-{
-  "date": "2024-01-15",
-  "totalEmployees": 50,
-  "presentEmployees": 45,
-  "absentEmployees": 5,
-  "lateArrivals": 3,
-  "earlyDepartures": 2
-}
+[
+  {
+    "id": 1,
+    "emp_id": "550e8400-e29b-41d4-a716-446655440000",
+    "checkin_datetime": "2025-09-03T08:00:00",
+    "checkout_datetime": "2025-09-03T17:00:00"
+  }
+]
 ```
 
----
+### Get Employee Attendance by Date
+**GET** `/api/attendance/employee/{empId}/date/{date}`
 
-### 19. Get Today's Attendance
-**Endpoint:** `GET /api/attendance/today`
+Returns attendance records for a specific employee on a specific date.
 
-**Description:** Get all attendance records for today.
+### Get Attendance Summary by Date
+**GET** `/api/attendance/summary/date/{date}`
 
-**Example Request:**
-```bash
-GET /api/attendance/today
+Returns attendance summary for all employees on a specific date.
+
+**Response (200 OK):**
+```json
+[
+  {
+    "emp_id": "550e8400-e29b-41d4-a716-446655440000",
+    "first_name": "John",
+    "last_name": "Doe",
+    "checkin_time": "08:00:00",
+    "checkout_time": "17:00:00",
+    "total_hours": 9.0,
+    "status": "COMPLETE"
+  }
+]
 ```
 
-**Response Structure:** Array of attendance objects for today
+### Get Employee Attendance Summary
+**GET** `/api/attendance/summary/employee/{empId}`
 
----
+Returns attendance summary for a specific employee.
 
-### 20. Get Today's Summary
-**Endpoint:** `GET /api/attendance/summary/today`
+### Get Today's Summary
+**GET** `/api/attendance/summary/today`
 
-**Description:** Get attendance summary for today.
+Returns today's attendance summary for all employees.
 
-**Example Request:**
-```bash
-GET /api/attendance/summary/today
-```
+### Get Attendance by Date Range
+**GET** `/api/attendance/date-range?start_date={startDate}&end_date={endDate}`
 
-**Response Structure:** Same as Get Attendance Summary by Date
-
----
+Returns attendance records within a date range.
 
 ## Data Models
 
-### Employee Model
+### Employee
 ```json
 {
-  "id": "number",
-  "empId": "string (UUID)",
-  "firstName": "string",
-  "lastName": "string",
-  "email": "string",
-  "roleId": "number",
-  "deptId": "number",
-  "reportingTo": "string (UUID) | null"
+  "id": 1,
+  "emp_id": "550e8400-e29b-41d4-a716-446655440000",
+  "first_name": "John",
+  "last_name": "Doe",
+  "email": "john.doe@example.com",
+  "password": "hashed_password",
+  "role_id": 1,
+  "dept_id": 1,
+  "reporting_to": "550e8400-e29b-41d4-a716-446655440001"
 }
 ```
 
-### Attendance Model
+### Attendance
 ```json
 {
-  "id": "number",
-  "empId": "string (UUID)",
-  "checkinDatetime": "string (ISO 8601)",
-  "checkoutDatetime": "string (ISO 8601) | null"
+  "id": 1,
+  "emp_id": "550e8400-e29b-41d4-a716-446655440000",
+  "checkin_datetime": "2025-09-03T08:00:00",
+  "checkout_datetime": "2025-09-03T17:00:00"
 }
 ```
 
-### Department Enum
+### Role
 ```json
 {
-  "1": "Engineering",
-  "2": "Marketing", 
-  "3": "HR",
-  "4": "Finance"
+  "id": 1,
+  "name": "Employee",
+  "description": "Regular employee"
 }
 ```
 
-### Role Enum
+### Department
 ```json
 {
-  "1": "Developer",
-  "2": "Manager",
-  "3": "Analyst", 
-  "4": "Admin"
+  "id": 1,
+  "name": "Engineering",
+  "description": "Software development team"
 }
 ```
-
----
 
 ## Error Responses
 
-### Standard Error Format
+All endpoints return consistent error responses:
+
+**400 Bad Request:**
 ```json
 {
-  "error": "Error message description"
+  "code": 400,
+  "message": "Validation error message"
 }
 ```
 
-### Common HTTP Status Codes
-- `200 OK`: Request successful
-- `201 Created`: Resource created successfully
-- `204 No Content`: Request successful, no content to return
-- `400 Bad Request`: Invalid request data or parameters
-- `404 Not Found`: Resource not found
-- `500 Internal Server Error`: Server error
+**401 Unauthorized:**
+```json
+{
+  "code": 401,
+  "message": "Invalid credentials"
+}
+```
 
----
+**404 Not Found:**
+```json
+{
+  "code": 404,
+  "message": "Resource not found"
+}
+```
 
-## Authentication & Security
-Currently, the API does not implement authentication. All endpoints are publicly accessible.
+**409 Conflict:**
+```json
+{
+  "code": 409,
+  "message": "Resource already exists"
+}
+```
 
----
+**500 Internal Server Error:**
+```json
+{
+  "code": 500,
+  "message": "Internal server error"
+}
+```
 
-## Rate Limiting
-Currently, the API does not implement rate limiting.
+## Authentication Flow
 
----
+1. **Login**: Use `/api/auth/login` with email and password
+2. **Store Token**: Store the returned employee data in localStorage/session
+3. **Role-based Access**: Use `role_id` from login response for authorization
+4. **Session Management**: Implement logout by clearing stored data
 
-## Notes for Frontend Developers
+## Frontend Implementation Notes
 
-1. **Date Format**: Always use ISO 8601 format (YYYY-MM-DD) for dates
-2. **UUID Format**: Employee IDs use UUID format (8-4-4-4-12 characters)
-3. **Time Zones**: All timestamps are in UTC
-4. **Field Names**: Use snake_case for request fields (emp_id, checkin_datetime, checkout_datetime)
-5. **Validation**: The API validates all input data and returns appropriate error messages
-6. **CORS**: Ensure your frontend handles CORS if calling from a different domain
-7. **Error Handling**: Always check HTTP status codes and handle error responses appropriately
-
----
+- Use the `role_id` from login response to implement role-based access control
+- Store employee data in localStorage or session storage after successful login
+- Implement proper error handling for all API calls
+- Use the employee UUID (`emp_id`) for attendance operations
+- Implement proper validation for all form inputs
+- Handle loading states and error states appropriately
 
 ## Testing
-Use the provided Bruno collection in the `bruno/` folder to test all endpoints before integration.
+
+You can test all endpoints using Bruno or any API testing tool like Postman. The backend is running on `http://localhost:8085`.

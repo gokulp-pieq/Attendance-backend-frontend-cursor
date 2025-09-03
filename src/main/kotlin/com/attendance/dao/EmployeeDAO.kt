@@ -14,8 +14,8 @@ import java.util.UUID
 @RegisterRowMapper(EmployeeRowMapper::class)
 interface EmployeeDAO {
     
-    @SqlUpdate("INSERT INTO employees (emp_id, first_name, last_name, email, role_id, dept_id, reporting_to) " +
-               "VALUES (:empId, :firstName, :lastName, :email, :roleId, :deptId, :reportingTo)")
+    @SqlUpdate("INSERT INTO employees (emp_id, first_name, last_name, email, password, role_id, dept_id, reporting_to) " +
+               "VALUES (:empId, :firstName, :lastName, :email, :password, :roleId, :deptId, :reportingTo)")
     @GetGeneratedKeys
     fun createEmployee(@BindBean employee: Employee): Int
     

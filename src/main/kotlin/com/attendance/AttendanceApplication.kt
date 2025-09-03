@@ -5,6 +5,7 @@ import com.attendance.db.DatabaseBundle
 import com.attendance.db.DatabaseHealthCheck
 import com.attendance.resources.EmployeeResource
 import com.attendance.resources.AttendanceResource
+import com.attendance.resources.AuthResource
 import io.dropwizard.core.Application
 import io.dropwizard.core.setup.Bootstrap
 import io.dropwizard.core.setup.Environment
@@ -27,6 +28,7 @@ class AttendanceApplication : Application<AttendanceConfiguration>() {
         // Register resources
         environment.jersey().register(EmployeeResource(jdbi))
         environment.jersey().register(AttendanceResource(jdbi))
+        environment.jersey().register(AuthResource(jdbi))
         
         // Register health checks
         environment.healthChecks().register("database-connection", DatabaseHealthCheck(jdbi))

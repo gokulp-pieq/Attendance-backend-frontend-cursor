@@ -20,6 +20,7 @@ data class Employee(
     @field:Email(message = "Invalid email format")
     @field:NotBlank(message = "Email is required")
     val email: String,
+    val password: String,
     @field:JsonProperty("role_id")
     @field:NotNull(message = "Role ID is required")
     val roleId: Int,

@@ -16,6 +16,7 @@ class EmployeeRowMapper : RowMapper<Employee> {
             firstName = rs.getString("first_name"),
             lastName = rs.getString("last_name"),
             email = rs.getString("email"),
+            password = rs.getString("password"),
             roleId = rs.getInt("role_id"),
             deptId = rs.getInt("dept_id"),
             reportingTo = rs.getString("reporting_to")?.let { UUID.fromString(it) }

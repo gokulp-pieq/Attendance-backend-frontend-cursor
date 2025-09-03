@@ -19,6 +19,9 @@ data class CreateEmployeeRequest(
     @field:NotBlank(message = "Email is required")
     val email: String,
     
+    @field:NotBlank(message = "Password is required")
+    val password: String,
+    
     @field:NotNull(message = "Role ID is required")
     @JsonProperty("role_id")
     val roleId: Int,

@@ -25,6 +25,7 @@ class EmployeeService(private val employeeDAO: EmployeeDAO) {
             firstName = request.firstName,
             lastName = request.lastName,
             email = request.email,
+            password = request.password,
             roleId = request.roleId,
             deptId = request.deptId,
             reportingTo = request.reportingTo
@@ -77,6 +78,7 @@ class EmployeeService(private val employeeDAO: EmployeeDAO) {
             firstName = request.firstName,
             lastName = request.lastName,
             email = request.email,
+            password = existingEmployee.password,
             roleId = request.roleId,
             deptId = request.deptId,
             reportingTo = request.reportingTo
@@ -109,6 +111,7 @@ class EmployeeService(private val employeeDAO: EmployeeDAO) {
             firstName = request.firstName,
             lastName = request.lastName,
             email = request.email,
+            password = existingEmployee.password,
             roleId = request.roleId,
             deptId = request.deptId,
             reportingTo = request.reportingTo
