@@ -1,7 +1,7 @@
 package com.attendance.resources
 
 import com.attendance.dto.LoginRequest
-import com.attendance.dto.LoginResponse
+import com.attendance.dto.EmployeeResponse
 import com.attendance.dao.EmployeeDAO
 import com.attendance.service.AuthService
 import jakarta.validation.Valid

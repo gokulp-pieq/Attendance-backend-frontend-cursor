@@ -183,4 +183,47 @@ class AttendanceResource(private val jdbi: Jdbi) {
         val summary = attendanceService.getAttendanceSummaryByDate(today)
         return Response.ok(summary).build()
     }
+    
+    @GET
+    @Path("/working-hours/{empId}")
+    fun getEmployeeWorkingHoursBetweenDates(
+        @PathParam("empId") empId: String,
+        @QueryParam("start_date") startDateStr: String,
+        @QueryParam("end_date") endDateStr: String
+    ): Response {
+        val uuid = try {
+            UUID.fromString(empId)
+        } catch (e: IllegalArgumentException) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(mapOf("error" to "Invalid UUID format")).build()
+        }
+        
+        val startDate = try {
+            LocalDate.parse(startDateStr, DateTimeFormatter.ISO_LOCAL_DATE)
+        } catch (e: Exception) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(mapOf("error" to "Invalid start date format. Use YYYY-MM-DD")).build()
+        }
+        
+        val endDate = try {
+            LocalDate.parse(endDateStr, DateTimeFormatter.ISO_LOCAL_DATE)
+        } catch (e: Exception) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity(mapOf("error" to "Invalid end date format. Use YYYY-MM-DD")).build()
+        }
+        
+        val totalWorkingHours = attendanceService.getEmployeeWorkingHoursBetweenDates(uuid, startDate, endDate)
+        
+        val response = mapOf(
+            "emp_id" to empId,
+            "start_date" to startDateStr,
+            "end_date" to endDateStr,
+            "total_working_seconds" to totalWorkingHours.seconds,
+            "total_working_hours" to totalWorkingHours.toHours(),
+            "total_working_minutes" to totalWorkingHours.toMinutes(),
+            "formatted_duration" to "${totalWorkingHours.toHours()}h ${totalWorkingHours.toMinutesPart()}m"
+        )
+        
+        return Response.ok(response).build()
+    }
 }

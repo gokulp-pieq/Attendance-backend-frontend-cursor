@@ -11,6 +11,7 @@ import io.dropwizard.core.setup.Bootstrap
 import io.dropwizard.core.setup.Environment
 import io.dropwizard.jdbi3.JdbiFactory
 import org.jdbi.v3.core.Jdbi
+import jakarta.servlet.FilterRegistration
 
 class AttendanceApplication : Application<AttendanceConfiguration>() {
 
@@ -21,6 +22,14 @@ class AttendanceApplication : Application<AttendanceConfiguration>() {
     }
 
     override fun run(configuration: AttendanceConfiguration, environment: Environment) {
+        // Configure CORS filter
+        val cors: FilterRegistration.Dynamic = environment.servlets().addFilter("CORS", org.eclipse.jetty.servlets.CrossOriginFilter::class.java)
+        cors.setInitParameter(org.eclipse.jetty.servlets.CrossOriginFilter.ALLOWED_ORIGINS_PARAM, "*")
+        cors.setInitParameter(org.eclipse.jetty.servlets.CrossOriginFilter.ALLOWED_HEADERS_PARAM, "X-Requested-With,Content-Type,Accept,Origin,Authorization")
+        cors.setInitParameter(org.eclipse.jetty.servlets.CrossOriginFilter.ALLOWED_METHODS_PARAM, "OPTIONS,GET,PUT,POST,DELETE,HEAD")
+        cors.setInitParameter(org.eclipse.jetty.servlets.CrossOriginFilter.ALLOW_CREDENTIALS_PARAM, "true")
+        cors.addMappingForUrlPatterns(null, true, "/*")
+        
         // Configure JDBI
         val factory = JdbiFactory()
         val jdbi: Jdbi = factory.build(environment, configuration.database, "database")

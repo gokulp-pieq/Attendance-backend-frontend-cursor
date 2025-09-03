@@ -1,16 +1,21 @@
 package com.attendance.service
 
 import com.attendance.dao.EmployeeDAO
+import com.attendance.dao.RoleDAO
+import com.attendance.dao.DepartmentDAO
 import com.attendance.dto.CreateEmployeeRequest
 import com.attendance.dto.UpdateEmployeeRequest
+import com.attendance.dto.EmployeeResponse
 import com.attendance.model.Employee
-import com.attendance.model.Role
-import com.attendance.model.Department
 import java.util.UUID
 import jakarta.ws.rs.WebApplicationException
 import jakarta.ws.rs.core.Response
 
-class EmployeeService(private val employeeDAO: EmployeeDAO) {
+class EmployeeService(
+    private val employeeDAO: EmployeeDAO,
+    private val roleDAO: RoleDAO,
+    private val departmentDAO: DepartmentDAO
+) {
     
     fun createEmployee(request: CreateEmployeeRequest): Employee {
         // Validate role and department
@@ -57,6 +62,31 @@ class EmployeeService(private val employeeDAO: EmployeeDAO) {
     fun getEmployeesByRole(roleId: Int): List<Employee> {
         validateRole(roleId)
         return employeeDAO.findByRole(roleId)
+    }
+    
+    // New methods that return EmployeeResponse with role and department names
+    fun getEmployeeByEmpIdWithDetails(empId: UUID): EmployeeResponse {
+        return employeeDAO.findByEmpIdWithDetails(empId) 
+            ?: throw WebApplicationException("Employee not found", Response.Status.NOT_FOUND)
+    }
+    
+    fun getEmployeeByEmailWithDetails(email: String): EmployeeResponse {
+        return employeeDAO.findByEmailWithDetails(email) 
+            ?: throw WebApplicationException("Employee not found", Response.Status.NOT_FOUND)
+    }
+    
+    fun getAllEmployeesWithDetails(): List<EmployeeResponse> {
+        return employeeDAO.findAllWithDetails()
+    }
+    
+    fun getEmployeesByDepartmentWithDetails(deptId: Int): List<EmployeeResponse> {
+        validateDepartment(deptId)
+        return employeeDAO.findByDepartmentWithDetails(deptId)
+    }
+    
+    fun getEmployeesByRoleWithDetails(roleId: Int): List<EmployeeResponse> {
+        validateRole(roleId)
+        return employeeDAO.findByRoleWithDetails(roleId)
     }
     
     fun updateEmployee(empId: UUID, request: UpdateEmployeeRequest): Employee {
@@ -159,13 +189,13 @@ class EmployeeService(private val employeeDAO: EmployeeDAO) {
     }
     
     private fun validateRole(roleId: Int) {
-        if (Role.fromId(roleId) == null) {
+        if (roleDAO.findById(roleId) == null) {
             throw WebApplicationException("Invalid role ID: $roleId", Response.Status.BAD_REQUEST)
         }
     }
     
     private fun validateDepartment(deptId: Int) {
-        if (Department.fromId(deptId) == null) {
+        if (departmentDAO.findById(deptId) == null) {
             throw WebApplicationException("Invalid department ID: $deptId", Response.Status.BAD_REQUEST)
         }
     }

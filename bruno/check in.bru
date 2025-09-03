@@ -1,0 +1,22 @@
+meta {
+  name: check in
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:8085/api/attendance/checkin
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "emp_id": "c38ee8c6-cd55-4705-85aa-c961e2710122",
+    "checkin_datetime": "2025-09-03T08:00:00"
+  }
+}
+
+settings {
+  encodeUrl: true
+}

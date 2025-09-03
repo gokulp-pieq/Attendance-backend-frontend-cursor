@@ -35,4 +35,7 @@ interface AttendanceDAO {
     
     @SqlQuery("SELECT * FROM attendances WHERE DATE(checkin_datetime) BETWEEN :startDate::date AND :endDate::date")
     fun findByDateRange(@Bind("startDate") startDate: String, @Bind("endDate") endDate: String): List<Attendance>
+    
+    @SqlQuery("SELECT * FROM attendances WHERE emp_id = :empId AND DATE(checkin_datetime) BETWEEN :startDate::date AND :endDate::date ORDER BY checkin_datetime")
+    fun findByEmployeeAndDateRange(@Bind("empId") empId: UUID, @Bind("startDate") startDate: String, @Bind("endDate") endDate: String): List<Attendance>
 }

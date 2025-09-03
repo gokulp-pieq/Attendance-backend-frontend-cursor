@@ -1,0 +1,15 @@
+meta {
+  name: checkout
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:8085/api/attendance/checkout
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}

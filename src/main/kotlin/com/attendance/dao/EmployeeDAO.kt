@@ -1,7 +1,9 @@
 package com.attendance.dao
 
 import com.attendance.model.Employee
+import com.attendance.dto.EmployeeResponse
 import com.attendance.db.EmployeeRowMapper
+import com.attendance.db.EmployeeResponseRowMapper
 import org.jdbi.v3.sqlobject.statement.SqlQuery
 import org.jdbi.v3.sqlobject.statement.SqlUpdate
 import org.jdbi.v3.sqlobject.statement.SqlScript
@@ -47,4 +49,73 @@ interface EmployeeDAO {
     
     @SqlQuery("SELECT COUNT(*) FROM employees WHERE email = :email AND emp_id != :empId")
     fun countByEmailExcludingId(@Bind("email") email: String, @Bind("empId") empId: UUID): Int
+    
+    // New methods with role and department names
+    @SqlQuery("""
+        SELECT e.id, e.emp_id, e.first_name, e.last_name, e.email, e.role_id, e.dept_id, e.reporting_to,
+               r.role_name, d.dept_name
+        FROM employees e
+        JOIN roles r ON e.role_id = r.id
+        JOIN departments d ON e.dept_id = d.id
+        WHERE e.id = :id
+    """)
+    @RegisterRowMapper(EmployeeResponseRowMapper::class)
+    fun findByIdWithDetails(@Bind("id") id: Int): EmployeeResponse?
+    
+    @SqlQuery("""
+        SELECT e.id, e.emp_id, e.first_name, e.last_name, e.email, e.role_id, e.dept_id, e.reporting_to,
+               r.role_name, d.dept_name
+        FROM employees e
+        JOIN roles r ON e.role_id = r.id
+        JOIN departments d ON e.dept_id = d.id
+        WHERE e.emp_id = :empId
+    """)
+    @RegisterRowMapper(EmployeeResponseRowMapper::class)
+    fun findByEmpIdWithDetails(@Bind("empId") empId: UUID): EmployeeResponse?
+    
+    @SqlQuery("""
+        SELECT e.id, e.emp_id, e.first_name, e.last_name, e.email, e.role_id, e.dept_id, e.reporting_to,
+               r.role_name, d.dept_name
+        FROM employees e
+        JOIN roles r ON e.role_id = r.id
+        JOIN departments d ON e.dept_id = d.id
+        WHERE e.email = :email
+    """)
+    @RegisterRowMapper(EmployeeResponseRowMapper::class)
+    fun findByEmailWithDetails(@Bind("email") email: String): EmployeeResponse?
+    
+    @SqlQuery("""
+        SELECT e.id, e.emp_id, e.first_name, e.last_name, e.email, e.role_id, e.dept_id, e.reporting_to,
+               r.role_name, d.dept_name
+        FROM employees e
+        JOIN roles r ON e.role_id = r.id
+        JOIN departments d ON e.dept_id = d.id
+        ORDER BY e.first_name, e.last_name
+    """)
+    @RegisterRowMapper(EmployeeResponseRowMapper::class)
+    fun findAllWithDetails(): List<EmployeeResponse>
+    
+    @SqlQuery("""
+        SELECT e.id, e.emp_id, e.first_name, e.last_name, e.email, e.role_id, e.dept_id, e.reporting_to,
+               r.role_name, d.dept_name
+        FROM employees e
+        JOIN roles r ON e.role_id = r.id
+        JOIN departments d ON e.dept_id = d.id
+        WHERE e.dept_id = :deptId
+        ORDER BY e.first_name, e.last_name
+    """)
+    @RegisterRowMapper(EmployeeResponseRowMapper::class)
+    fun findByDepartmentWithDetails(@Bind("deptId") deptId: Int): List<EmployeeResponse>
+    
+    @SqlQuery("""
+        SELECT e.id, e.emp_id, e.first_name, e.last_name, e.email, e.role_id, e.dept_id, e.reporting_to,
+               r.role_name, d.dept_name
+        FROM employees e
+        JOIN roles r ON e.role_id = r.id
+        JOIN departments d ON e.dept_id = d.id
+        WHERE e.role_id = :roleId
+        ORDER BY e.first_name, e.last_name
+    """)
+    @RegisterRowMapper(EmployeeResponseRowMapper::class)
+    fun findByRoleWithDetails(@Bind("roleId") roleId: Int): List<EmployeeResponse>
 }

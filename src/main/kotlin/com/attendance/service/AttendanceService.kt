@@ -5,6 +5,7 @@ import com.attendance.dao.EmployeeDAO
 import com.attendance.dto.CheckinRequest
 import com.attendance.dto.CheckoutRequest
 import com.attendance.dto.AttendanceSummaryResponse
+import com.attendance.dto.AttendanceResponse
 import com.attendance.model.Attendance
 import com.attendance.model.Employee
 import java.time.LocalDate
@@ -20,9 +21,9 @@ class AttendanceService(
     private val employeeDAO: EmployeeDAO
 ) {
     
-    fun checkin(request: CheckinRequest): Attendance {
+    fun checkin(request: CheckinRequest): AttendanceResponse {
         // Validate employee exists
-        val employee = employeeDAO.findByEmpId(request.empId)
+        employeeDAO.findByEmpId(request.empId)
             ?: throw WebApplicationException("Employee not found", Response.Status.NOT_FOUND)
         
         val checkinDate = request.checkinDatetime.toLocalDate()
@@ -31,23 +32,24 @@ class AttendanceService(
         val existingAttendances = attendanceDAO.findByEmployeeAndDate(request.empId, checkinDate.toString())
         val existingOpenAttendance = existingAttendances.find { it.checkoutDatetime == null }
         if (existingOpenAttendance != null) {
-            throw WebApplicationException("Employee already checked in today", Response.Status.CONFLICT)
+            throw WebApplicationException("Employee already checked in today. Must check out before checking in again.", Response.Status.CONFLICT)
         }
         
-        // Validate checkin time (business hours: 6 AM to 10 PM)
-        validateCheckinTime(request.checkinDatetime)
+        // No time restrictions - allow check-in at any time
         
-        val id = attendanceDAO.createCheckin(request.empId, request.checkinDatetime)
-        return Attendance(
-            id = id,
-            empId = request.empId,
-            checkinDatetime = request.checkinDatetime
+        attendanceDAO.createCheckin(request.empId, request.checkinDatetime)
+        
+        return AttendanceResponse(
+            empId = request.empId.toString(),
+            checkinDatetime = request.checkinDatetime,
+            checkoutDatetime = null,
+            totalWorkingSeconds = null
         )
     }
     
-    fun checkout(request: CheckoutRequest): Attendance {
+    fun checkout(request: CheckoutRequest): AttendanceResponse {
         // Validate employee exists
-        val employee = employeeDAO.findByEmpId(request.empId)
+        employeeDAO.findByEmpId(request.empId)
             ?: throw WebApplicationException("Employee not found", Response.Status.NOT_FOUND)
         
         val checkoutDate = request.checkoutDatetime.toLocalDate()
@@ -55,22 +57,29 @@ class AttendanceService(
         // Find open attendance for today
         val existingAttendances = attendanceDAO.findByEmployeeAndDate(request.empId, checkoutDate.toString())
         val openAttendance = existingAttendances.find { it.checkoutDatetime == null }
-            ?: throw WebApplicationException("No open attendance found for today", Response.Status.NOT_FOUND)
+            ?: throw WebApplicationException("No open attendance found for today. Must check in before checking out.", Response.Status.NOT_FOUND)
         
         // Validate checkout time is after checkin time
         if (request.checkoutDatetime.isBefore(openAttendance.checkinDatetime)) {
             throw WebApplicationException("Checkout time cannot be before checkin time", Response.Status.BAD_REQUEST)
         }
         
-        // Validate checkout time (business hours: 6 AM to 10 PM)
-        validateCheckoutTime(request.checkoutDatetime)
+        // No time restrictions - allow check-out at any time
         
         val rowsAffected = attendanceDAO.updateCheckout(request.empId, request.checkoutDatetime)
         if (rowsAffected == 0) {
             throw WebApplicationException("Failed to checkout", Response.Status.INTERNAL_SERVER_ERROR)
         }
         
-        return openAttendance.copy(checkoutDatetime = request.checkoutDatetime)
+        // Calculate total working hours in seconds
+        val totalWorkingSeconds = Duration.between(openAttendance.checkinDatetime, request.checkoutDatetime).seconds
+        
+        return AttendanceResponse(
+            empId = request.empId.toString(),
+            checkinDatetime = openAttendance.checkinDatetime,
+            checkoutDatetime = request.checkoutDatetime,
+            totalWorkingSeconds = totalWorkingSeconds
+        )
     }
     
     fun getAttendanceByEmployeeId(empId: UUID): List<Attendance> {
@@ -87,6 +96,19 @@ class AttendanceService(
             ?: throw WebApplicationException("Employee not found", Response.Status.NOT_FOUND)
         
         return attendanceDAO.findByEmployeeAndDate(empId, date.toString())
+    }
+    
+    /**
+     * Get all attendance sessions for a specific day for an employee
+     * This will show multiple check-ins/check-outs if they exist
+     */
+    fun getEmployeeDailyAttendanceSessions(empId: UUID, date: LocalDate): List<Attendance> {
+        // Validate employee exists
+        employeeDAO.findByEmpId(empId)
+            ?: throw WebApplicationException("Employee not found", Response.Status.NOT_FOUND)
+        
+        return attendanceDAO.findByEmployeeAndDate(empId, date.toString())
+            .sortedBy { it.checkinDatetime } // Sort by check-in time to show chronological order
     }
     
     fun getAttendanceByDate(date: LocalDate): List<Attendance> {
@@ -154,17 +176,66 @@ class AttendanceService(
         )
     }
     
-    private fun validateCheckinTime(checkinTime: LocalDateTime) {
-        val time = checkinTime.toLocalTime()
-        if (time.isBefore(LocalTime.of(6, 0)) || time.isAfter(LocalTime.of(22, 0))) {
-            throw WebApplicationException("Checkin time must be between 6:00 AM and 10:00 PM", Response.Status.BAD_REQUEST)
-        }
+
+    
+    /**
+     * Get the current attendance status for an employee
+     * Returns the open attendance if employee is checked in, null if checked out
+     */
+    fun getCurrentAttendanceStatus(empId: UUID): Attendance? {
+        // Validate employee exists
+        employeeDAO.findByEmpId(empId)
+            ?: throw WebApplicationException("Employee not found", Response.Status.NOT_FOUND)
+        
+        val today = LocalDate.now()
+        val todayAttendances = attendanceDAO.findByEmployeeAndDate(empId, today.toString())
+        return todayAttendances.find { it.checkoutDatetime == null }
     }
     
-    private fun validateCheckoutTime(checkoutTime: LocalDateTime) {
-        val time = checkoutTime.toLocalTime()
-        if (time.isBefore(LocalTime.of(6, 0)) || time.isAfter(LocalTime.of(22, 0))) {
-            throw WebApplicationException("Checkout time must be between 6:00 AM and 10:00 PM", Response.Status.BAD_REQUEST)
+    /**
+     * Calculate total working hours for a specific day for an employee
+     * This handles multiple check-ins/check-outs per day
+     */
+    fun getEmployeeDailyWorkingHours(empId: UUID, date: LocalDate): Duration {
+        // Validate employee exists
+        employeeDAO.findByEmpId(empId)
+            ?: throw WebApplicationException("Employee not found", Response.Status.NOT_FOUND)
+        
+        val dayAttendances = attendanceDAO.findByEmployeeAndDate(empId, date.toString())
+            .filter { it.checkoutDatetime != null } // Only count completed sessions
+            .sortedBy { it.checkinDatetime }
+        
+        var totalDuration = Duration.ZERO
+        for (attendance in dayAttendances) {
+            val sessionDuration = Duration.between(attendance.checkinDatetime, attendance.checkoutDatetime!!)
+            totalDuration = totalDuration.plus(sessionDuration)
         }
+        
+        return totalDuration
+    }
+    
+    /**
+     * Calculate total working hours for an employee between two dates
+     * This handles multiple check-ins/check-outs per day across the date range
+     */
+    fun getEmployeeWorkingHoursBetweenDates(empId: UUID, startDate: LocalDate, endDate: LocalDate): Duration {
+        // Validate employee exists
+        employeeDAO.findByEmpId(empId)
+            ?: throw WebApplicationException("Employee not found", Response.Status.NOT_FOUND)
+        
+        if (startDate.isAfter(endDate)) {
+            throw WebApplicationException("Start date cannot be after end date", Response.Status.BAD_REQUEST)
+        }
+        
+        val attendances = attendanceDAO.findByEmployeeAndDateRange(empId, startDate.toString(), endDate.toString())
+            .filter { it.checkoutDatetime != null } // Only count completed sessions
+        
+        var totalDuration = Duration.ZERO
+        for (attendance in attendances) {
+            val sessionDuration = Duration.between(attendance.checkinDatetime, attendance.checkoutDatetime!!)
+            totalDuration = totalDuration.plus(sessionDuration)
+        }
+        
+        return totalDuration
     }
 }

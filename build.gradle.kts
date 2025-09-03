@@ -2,6 +2,7 @@ plugins {
     kotlin("jvm") version "1.9.22"
     kotlin("plugin.serialization") version "1.9.22"
     id("com.github.johnrengelman.shadow") version "8.1.1"
+    application
 }
 
 group = "com.attendance"
@@ -16,6 +17,7 @@ dependencies {
     implementation("io.dropwizard:dropwizard-jdbi3:4.0.4")
     implementation("io.dropwizard:dropwizard-migrations:4.0.4")
     implementation("io.dropwizard:dropwizard-validation:4.0.4")
+    implementation("org.eclipse.jetty:jetty-servlets:11.0.15")
     implementation("org.postgresql:postgresql:42.7.1")
     implementation("org.flywaydb:flyway-core:10.7.1")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
@@ -30,17 +32,15 @@ dependencies {
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
 }
 
-tasks {
-    test {
-        useJUnitPlatform()
-    }
-    shadowJar {
-        mergeServiceFiles()
-        manifest {
-            attributes(mapOf("Main-Class" to "com.attendance.AttendanceApplicationKt"))
-        }
-    }
+application {
+    mainClass.set("com.attendance.AttendanceApplicationKt")
 }
+
+tasks.named<JavaExec>("run") {
+    args("server", "config.yml")
+    jvmArgs = listOf("-Duser.timezone=Asia/Kolkata")
+}
+
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21

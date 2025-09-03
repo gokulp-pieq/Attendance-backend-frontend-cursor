@@ -1,8 +1,11 @@
 package com.attendance.resources
 
 import com.attendance.dao.EmployeeDAO
+import com.attendance.dao.RoleDAO
+import com.attendance.dao.DepartmentDAO
 import com.attendance.dto.CreateEmployeeRequest
 import com.attendance.dto.UpdateEmployeeRequest
+import com.attendance.dto.EmployeeResponse
 import com.attendance.model.Employee
 import com.attendance.service.EmployeeService
 import org.jdbi.v3.core.Jdbi
@@ -18,7 +21,11 @@ import java.util.UUID
 class EmployeeResource(private val jdbi: Jdbi) {
     
     private val employeeService: EmployeeService by lazy {
-        EmployeeService(jdbi.onDemand(EmployeeDAO::class.java))
+        EmployeeService(
+            jdbi.onDemand(EmployeeDAO::class.java),
+            jdbi.onDemand(RoleDAO::class.java),
+            jdbi.onDemand(DepartmentDAO::class.java)
+        )
     }
     
     @POST
@@ -34,10 +41,30 @@ class EmployeeResource(private val jdbi: Jdbi) {
         @QueryParam("search") search: String?
     ): Response {
         val employees = when {
-            deptId != null -> employeeService.getEmployeesByDepartment(deptId)
-            roleId != null -> employeeService.getEmployeesByRole(roleId)
-            !search.isNullOrBlank() -> employeeService.searchEmployees(search)
-            else -> employeeService.getAllEmployees()
+            deptId != null -> employeeService.getEmployeesByDepartmentWithDetails(deptId)
+            roleId != null -> employeeService.getEmployeesByRoleWithDetails(roleId)
+            !search.isNullOrBlank() -> {
+                // For search, we still use the old method but convert to EmployeeResponse
+                val searchResults = employeeService.searchEmployees(search)
+                searchResults.map { employee ->
+                    // Convert Employee to EmployeeResponse using DAO values
+                    val role = jdbi.onDemand(RoleDAO::class.java).findById(employee.roleId)
+                    val dept = jdbi.onDemand(DepartmentDAO::class.java).findById(employee.deptId)
+                    EmployeeResponse(
+                        id = employee.id,
+                        empId = employee.empId,
+                        firstName = employee.firstName,
+                        lastName = employee.lastName,
+                        email = employee.email,
+                        roleId = employee.roleId,
+                        roleName = role?.get("role_name")?.toString() ?: "Unknown",
+                        deptId = employee.deptId,
+                        deptName = dept?.get("dept_name")?.toString() ?: "Unknown",
+                        reportingTo = employee.reportingTo
+                    )
+                }
+            }
+            else -> employeeService.getAllEmployeesWithDetails()
         }
         
         return Response.ok(employees).build()
@@ -53,14 +80,14 @@ class EmployeeResource(private val jdbi: Jdbi) {
                 .entity(mapOf("error" to "Invalid UUID format")).build()
         }
         
-        val employee = employeeService.getEmployeeByEmpId(uuid)
+        val employee = employeeService.getEmployeeByEmpIdWithDetails(uuid)
         return Response.ok(employee).build()
     }
     
     @GET
     @Path("/email/{email}")
     fun getEmployeeByEmail(@PathParam("email") email: String): Response {
-        val employee = employeeService.getEmployeeByEmail(email)
+        val employee = employeeService.getEmployeeByEmailWithDetails(email)
         return Response.ok(employee).build()
     }
     
@@ -125,11 +152,10 @@ class EmployeeResource(private val jdbi: Jdbi) {
     @GET
     @Path("/roles")
     fun getRoles(): Response {
-        val roles = com.attendance.model.Role.values().map { role ->
+        val roles = jdbi.onDemand(RoleDAO::class.java).findAll().map { role ->
             mapOf(
-                "id" to role.id,
-                "name" to role.roleName,
-                "description" to role.description
+                "id" to role["id"],
+                "name" to role["role_name"]
             )
         }
         return Response.ok(roles).build()
@@ -138,11 +164,10 @@ class EmployeeResource(private val jdbi: Jdbi) {
     @GET
     @Path("/departments")
     fun getDepartments(): Response {
-        val departments = com.attendance.model.Department.values().map { dept ->
+        val departments = jdbi.onDemand(DepartmentDAO::class.java).findAll().map { dept ->
             mapOf(
-                "id" to dept.id,
-                "name" to dept.deptName,
-                "description" to dept.description
+                "id" to dept["id"],
+                "name" to dept["dept_name"]
             )
         }
         return Response.ok(departments).build()

@@ -1,18 +1,19 @@
 package com.attendance.dto
 
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.util.UUID
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 
-data class CreateEmployeeRequest(
+data class CreateEmployeeRequest @JsonCreator constructor(
     @field:NotBlank(message = "First name is required")
-    @JsonProperty("first_name")
+    @param:JsonProperty("first_name")
     val firstName: String,
     
     @field:NotBlank(message = "Last name is required")
-    @JsonProperty("last_name")
+    @param:JsonProperty("last_name")
     val lastName: String,
     
     @field:Email(message = "Invalid email format")
@@ -23,13 +24,13 @@ data class CreateEmployeeRequest(
     val password: String,
     
     @field:NotNull(message = "Role ID is required")
-    @JsonProperty("role_id")
+    @param:JsonProperty("role_id")
     val roleId: Int,
     
     @field:NotNull(message = "Department ID is required")
-    @JsonProperty("dept_id")
+    @param:JsonProperty("dept_id")
     val deptId: Int,
     
-    @JsonProperty("reporting_to")
+    @param:JsonProperty("reporting_to")
     val reportingTo: UUID? = null
 )
