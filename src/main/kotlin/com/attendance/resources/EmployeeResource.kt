@@ -57,9 +57,9 @@ class EmployeeResource(private val jdbi: Jdbi) {
                         lastName = employee.lastName,
                         email = employee.email,
                         roleId = employee.roleId,
-                        roleName = role?.get("role_name")?.toString() ?: "Unknown",
+                        roleName = role?.name ?: "Unknown",
                         deptId = employee.deptId,
-                        deptName = dept?.get("dept_name")?.toString() ?: "Unknown",
+                        deptName = dept?.name ?: "Unknown",
                         reportingTo = employee.reportingTo
                     )
                 }
@@ -152,24 +152,36 @@ class EmployeeResource(private val jdbi: Jdbi) {
     @GET
     @Path("/roles")
     fun getRoles(): Response {
-        val roles = jdbi.onDemand(RoleDAO::class.java).findAll().map { role ->
-            mapOf(
-                "id" to role["id"],
-                "name" to role["role_name"]
-            )
+        return try {
+            val roles = employeeService.getRoles().map { role ->
+                mapOf(
+                    "id" to role.id,
+                    "name" to role.name
+                )
+            }
+            Response.ok(roles).build()
+        } catch (e: Exception) {
+            Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(mapOf("error" to "Failed to fetch roles: ${e.message}"))
+                .build()
         }
-        return Response.ok(roles).build()
     }
     
     @GET
     @Path("/departments")
     fun getDepartments(): Response {
-        val departments = jdbi.onDemand(DepartmentDAO::class.java).findAll().map { dept ->
-            mapOf(
-                "id" to dept["id"],
-                "name" to dept["dept_name"]
-            )
+        return try {
+            val departments = employeeService.getDepartments().map { dept ->
+                mapOf(
+                    "id" to dept.id,
+                    "name" to dept.name
+                )
+            }
+            Response.ok(departments).build()
+        } catch (e: Exception) {
+            Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(mapOf("error" to "Failed to fetch departments: ${e.message}"))
+                .build()
         }
-        return Response.ok(departments).build()
     }
 }

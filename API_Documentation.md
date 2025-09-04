@@ -145,11 +145,18 @@ Creates a new employee.
   "last_name": "Smith",
   "email": "jane.smith@example.com",
   "password": "password123",
-  "role_id": 1,
-  "dept_id": 1,
+  "role_name": "Employee",
+  "dept_name": "Information Technology",
   "reporting_to": "550e8400-e29b-41d4-a716-446655440000"
 }
 ```
+
+**Notes:**
+- `role_name` (required): Role name (e.g., "Employee", "Manager", "Admin")
+- `dept_name` (required): Department name (e.g., "Information Technology", "Engineering", "Sales")
+- `reporting_to` (optional): UUID string of the reporting manager. Must be a valid UUID format and reference an existing employee.
+- The system will automatically look up the corresponding role_id and dept_id from the provided names
+- The system will validate that the reporting manager exists before creating the employee
 
 **Response (201 Created):**
 ```json
@@ -708,11 +715,13 @@ Returns total working hours for a specific employee between two dates.
   "last_name": "Smith",
   "email": "jane.smith@example.com",
   "password": "password123",
-  "role_id": 1,
-  "dept_id": 1,
+  "role_name": "Employee",
+  "dept_name": "Information Technology",
   "reporting_to": "550e8400-e29b-41d4-a716-446655440000"
 }
 ```
+
+**Note:** The `reporting_to` field accepts a UUID string and will be validated to ensure the referenced employee exists.
 
 ### UpdateEmployeeRequest
 ```json

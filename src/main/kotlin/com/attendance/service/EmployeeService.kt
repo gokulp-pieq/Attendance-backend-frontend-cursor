@@ -6,6 +6,8 @@ import com.attendance.dao.DepartmentDAO
 import com.attendance.dto.CreateEmployeeRequest
 import com.attendance.dto.UpdateEmployeeRequest
 import com.attendance.dto.EmployeeResponse
+import com.attendance.dto.RoleResponse
+import com.attendance.dto.DepartmentResponse
 import com.attendance.model.Employee
 import java.util.UUID
 import jakarta.ws.rs.WebApplicationException
@@ -18,12 +20,36 @@ class EmployeeService(
 ) {
     
     fun createEmployee(request: CreateEmployeeRequest): Employee {
+        // Look up role and department IDs from names
+        val role = roleDAO.findByRoleName(request.roleName)
+            ?: throw WebApplicationException("Invalid role name: ${request.roleName}", Response.Status.BAD_REQUEST)
+        
+        val department = departmentDAO.findByDepartmentName(request.deptName)
+            ?: throw WebApplicationException("Invalid department name: ${request.deptName}", Response.Status.BAD_REQUEST)
+        
+        val roleId = role.id
+        val deptId = department.id
+        
         // Validate role and department
-        validateRoleAndDepartment(request.roleId, request.deptId)
+        validateRoleAndDepartment(roleId, deptId)
         
         // Check if email already exists
         if (employeeDAO.findByEmail(request.email) != null) {
             throw WebApplicationException("Email already exists", Response.Status.CONFLICT)
+        }
+        
+        // Convert reporting_to string to UUID and validate it exists
+        val reportingToUuid = request.reportingTo?.let { reportingToStr ->
+            try {
+                val uuid = UUID.fromString(reportingToStr)
+                // Validate that the reporting manager exists
+                if (employeeDAO.findByEmpId(uuid) == null) {
+                    throw WebApplicationException("Reporting manager with UUID $reportingToStr not found", Response.Status.BAD_REQUEST)
+                }
+                uuid
+            } catch (e: IllegalArgumentException) {
+                throw WebApplicationException("Invalid UUID format for reporting_to: $reportingToStr", Response.Status.BAD_REQUEST)
+            }
         }
         
         val employee = Employee(
@@ -31,9 +57,9 @@ class EmployeeService(
             lastName = request.lastName,
             email = request.email,
             password = request.password,
-            roleId = request.roleId,
-            deptId = request.deptId,
-            reportingTo = request.reportingTo
+            roleId = roleId,
+            deptId = deptId,
+            reportingTo = reportingToUuid
         )
         
         val id = employeeDAO.createEmployee(employee)
@@ -181,6 +207,14 @@ class EmployeeService(
             employee.lastName.contains(query, ignoreCase = true) ||
             employee.email.contains(query, ignoreCase = true)
         }
+    }
+    
+    fun getRoles(): List<RoleResponse> {
+        return roleDAO.findAll()
+    }
+    
+    fun getDepartments(): List<DepartmentResponse> {
+        return departmentDAO.findAll()
     }
     
     private fun validateRoleAndDepartment(roleId: Int, deptId: Int) {

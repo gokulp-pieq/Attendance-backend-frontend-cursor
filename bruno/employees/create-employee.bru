@@ -8,12 +8,13 @@ post {
   url: {{baseUrl}}/api/employees
   body: json {
     {
-      "firstName": "John",
-      "lastName": "Doe",
+      "first_name": "John",
+      "last_name": "Doe",
       "email": "john.doe@example.com",
-      "roleId": 1,
-      "deptId": 1,
-      "reportingTo": null
+      "password": "password123",
+      "role_name": "Developer",
+      "dept_name": "Engineering",
+      "reporting_to": null
     }
   }
 }
@@ -22,7 +23,8 @@ docs {
   desc: Create a new employee
   examples: [
     "Create employee with all required fields",
-    "Department ID 1 = Engineering, Role ID 1 = Developer",
-    "Note: Use snake_case field names in requests"
+    "Use role_name and dept_name instead of IDs",
+    "Available roles: Developer, Designer, Intern, Manager, Admin",
+    "Available departments: Software Development, Cloud Computing, Cyber Security, Engineering"
   ]
 }

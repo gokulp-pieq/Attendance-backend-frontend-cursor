@@ -1,16 +1,22 @@
 package com.attendance.dao
 
+import com.attendance.dto.RoleResponse
 import org.jdbi.v3.sqlobject.statement.SqlQuery
 import org.jdbi.v3.sqlobject.customizer.Bind
+import org.jdbi.v3.sqlobject.config.RegisterRowMapper
+import com.attendance.db.RoleResponseRowMapper
 
 interface RoleDAO {
     
     @SqlQuery("SELECT id, role_name FROM roles ORDER BY id")
-    fun findAll(): List<Map<String, Any>>
+    @RegisterRowMapper(RoleResponseRowMapper::class)
+    fun findAll(): List<RoleResponse>
     
     @SqlQuery("SELECT id, role_name FROM roles WHERE id = :id")
-    fun findById(@Bind("id") id: Int): Map<String, Any>?
+    @RegisterRowMapper(RoleResponseRowMapper::class)
+    fun findById(@Bind("id") id: Int): RoleResponse?
     
     @SqlQuery("SELECT id, role_name FROM roles WHERE role_name = :roleName")
-    fun findByRoleName(@Bind("roleName") roleName: String): Map<String, Any>?
+    @RegisterRowMapper(RoleResponseRowMapper::class)
+    fun findByRoleName(@Bind("roleName") roleName: String): RoleResponse?
 }

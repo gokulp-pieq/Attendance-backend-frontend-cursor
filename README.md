@@ -84,11 +84,14 @@ Content-Type: application/json
   "first_name": "John",
   "last_name": "Doe",
   "email": "john.doe@company.com",
-  "role_id": 1,
-  "dept_id": 1,
+  "password": "password123",
+  "role_name": "Developer",
+  "dept_name": "Engineering",
   "reporting_to": null
 }
 ```
+
+**Note:** Use `role_name` and `dept_name` instead of IDs. The system will automatically look up the corresponding IDs.
 
 #### Get All Employees
 ```http

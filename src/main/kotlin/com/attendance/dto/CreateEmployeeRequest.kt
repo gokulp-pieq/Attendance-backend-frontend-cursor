@@ -1,36 +1,38 @@
 package com.attendance.dto
 
-import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
-import java.util.UUID
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.NotNull
 
-data class CreateEmployeeRequest @JsonCreator constructor(
+data class CreateEmployeeRequest(
     @field:NotBlank(message = "First name is required")
-    @param:JsonProperty("first_name")
+    @JsonProperty("first_name")
     val firstName: String,
     
     @field:NotBlank(message = "Last name is required")
-    @param:JsonProperty("last_name")
+    @JsonProperty("last_name")
     val lastName: String,
     
     @field:Email(message = "Invalid email format")
     @field:NotBlank(message = "Email is required")
+    @JsonProperty("email")
     val email: String,
     
     @field:NotBlank(message = "Password is required")
+    @JsonProperty("password")
     val password: String,
     
-    @field:NotNull(message = "Role ID is required")
-    @param:JsonProperty("role_id")
-    val roleId: Int,
+    @field:NotBlank(message = "Role name is required")
+    @JsonProperty("role_name")
+    val roleName: String,
     
-    @field:NotNull(message = "Department ID is required")
-    @param:JsonProperty("dept_id")
-    val deptId: Int,
+    @field:NotBlank(message = "Department name is required")
+    @JsonProperty("dept_name")
+    val deptName: String,
     
-    @param:JsonProperty("reporting_to")
-    val reportingTo: UUID? = null
-)
+    @JsonProperty("reporting_to")
+    val reportingTo: String? = null
+) {
+    // Add a no-argument constructor for Jackson
+    constructor() : this("", "", "", "", "", "", null)
+}
